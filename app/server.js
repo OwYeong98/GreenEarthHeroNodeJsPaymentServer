@@ -13,11 +13,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // See the README about ordering of middleware
 // Load the routes ("controllers" -ish)
-// firebaseTokenCheckMiddleware = require('./middleware/firebaseTokenAuthorizationMiddleware')
-// firebaseTokenCheckMiddleware(app,'/api/stripe/initializePaymentIntent')
+firebaseTokenCheckMiddleware = require('./middleware/firebaseTokenAuthorizationMiddleware')
+firebaseTokenCheckMiddleware(app,'/api/stripe/initializePaymentIntent')
 
 
-// app.use('/api/stripe', require('./module/stripepayment/router'))
+app.use('/api/stripe', require('./module/stripepayment/router'))
 
 
 

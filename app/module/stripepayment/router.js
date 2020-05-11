@@ -3,8 +3,7 @@ var router = require('express').Router()
 var jsonFormatter = require('../../jsonRespondFormat')
 const { check, validationResult } = require('express-validator');
 
-// var stripe = require('stripe')(process.env.STRIPE_SERVER_API_KEY);
-var stripe = require('stripe')('sk_test_rsNSuvTRfZipHASqm7VRkiKQ00OWhaWGW4');
+var stripe = require('stripe')(process.env.STRIPE_SERVER_API_KEY);
 const admin = require('firebase-admin');
 
 router.get('/initializePaymentIntent', [

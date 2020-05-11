@@ -2,10 +2,19 @@
   "name": "greenearthheronodejspaymentserver",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "scripts": {
+    "start": "node ./app/server.js"
+  },
+  "main": "./app/server",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "bole": "^4.0.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "morgan": "^1.10.0"
+    "express-validator": "^6.4.1",
+    "firebase-admin": "^8.12.1",
+    "morgan": "^1.10.0",
+    "stripe": "^8.50.0",
+    "validator": "^13.0.0"
   }
 }

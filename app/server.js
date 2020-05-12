@@ -3,20 +3,20 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 
-app.use((req, res, next)=> {   
-    var data_stream ='';                 
+// app.use((req, res, next)=> {   
+//     var data_stream ='';                 
    
-    // Readable streams emit 'data' events once a listener is added
-    req.setEncoding('utf-8')            
-    .on('data', function(data) {                         
-      data_stream += data;      
-    })    
-    .on('end', function() {           
-      req.rawBody                                                 
-      req.rawBody = data_stream;   
-      next();
-    }) 
-  });
+//     // Readable streams emit 'data' events once a listener is added
+//     req.setEncoding('utf-8')            
+//     .on('data', function(data) {                         
+//       data_stream += data;      
+//     })    
+//     .on('end', function() {           
+//       req.rawBody                                                 
+//       req.rawBody = data_stream;   
+//       next();
+//     }) 
+//   });
 
 // var unless = function(path, middleware) {
 //     return function(req, res, next) {
@@ -27,11 +27,19 @@ app.use((req, res, next)=> {
 //         }
 //     };
 // };
-// //pass body as json
-// // support parsing of application/json type post data
-// app.use(bodyParser.json());
-// //support parsing of application/x-www-form-urlencoded post data
-// app.use(bodyParser.urlencoded({ extended: true }));
+//pass body as json
+// support parsing of application/json type post data
+app.use(bodyParser.json({
+    // Because Stripe needs the raw body, we compute it but only when hitting the Stripe callback URL.
+    verify: function(req,res,buf) {
+        var url = req.originalUrl;
+        if (url.startsWith('/api/stripe/webhook')) {
+            req.rawBody = buf.toString()
+        }
+    }}));
+
+//support parsing of application/x-www-form-urlencoded post data
+app.use(bodyParser.urlencoded({ extended: true }));
 
 
 // See the README about ordering of middleware

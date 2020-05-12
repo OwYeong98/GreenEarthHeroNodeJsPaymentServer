@@ -3,7 +3,7 @@ var JsonRespond = class JsonRespond{
     constructor(){
         this.code = "";
         this.http_code = "";
-        this.error = "" ;
+        this.error = [""] ;
         this.message = "";
         this.data={};
 

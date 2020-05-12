@@ -73,45 +73,45 @@ router.get('/initializePaymentIntent', [
 )
 
 
+// router.post('/webhook', function(req,res){
+//     log.info(`received hook`)
+//     let event;
+//     const sig = req.headers['stripe-signature'];
 
+    
+//     try {
+//       event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+//     }
+//     catch (err) {
+//       response.status(400).send(`Webhook Error: ${err.message}`);
+//     }
 
-router.get('/webhook', function(req,res){
-    let event;
-    const sig = req.headers['stripe-signature'];
-
-    try {
-      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-    }
-    catch (err) {
-      response.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    // Handle the event
-    switch (event.type) {
-      case 'payment_intent.succeeded':
-        const paymentIntent = event.data.object;
+//     // Handle the event
+//     switch (event.type) {
+//       case 'payment_intent.succeeded':
+//         const paymentIntent = event.data.object;
         
-        var firebaseUserId= paymentIntent.metadata.firebaseUser;
-        var locationId = paymentIntent.metadata.locationId;
-        var itemId = paymentIntent.metadata.itemId;
+//         var firebaseUserId= paymentIntent.metadata.firebaseUser;
+//         var locationId = paymentIntent.metadata.locationId;
+//         var itemId = paymentIntent.metadata.itemId;
 
-        log.info(`webhook received userID: ${firebaseUserId} | locId: ${locationId} | itemId: ${itemId}`)
+//         log.info(`webhook received userID: ${firebaseUserId} | locId: ${locationId} | itemId: ${itemId}`)
 
-        let documentRef = admin.firestore().doc('Second_Hand_Item/'+itemId);
+//         let documentRef = admin.firestore().doc('Second_Hand_Item/'+itemId);
 
-        documentRef.update({deliveryLocationId: locationId,boughtBy: firebaseUserId}).then(res => {
-          console.log(`Document updated at ${res.updateTime}`);
-        });
-        break;
-        
-      default:
-        // Unexpected event type
-        return response.status(400).end();
-    }
+//         documentRef.update({deliveryLocationId: locationId,boughtBy: firebaseUserId}).then(res => {
+//           console.log(`Document updated at ${res.updateTime}`);
+//         });
+//         break;
 
-    // Return a response to acknowledge receipt of the event
-    response.json({received: true});
-})
+//       default:
+//         // Unexpected event type
+//         return response.status(400).end();
+//     }
+
+//     // Return a response to acknowledge receipt of the event
+//     response.json({received: true});
+// })
 router.get('/testerrorhaha', function(req,res){
     new jsonFormatter().respondWithError(res,"Sorry input invalid",new jsonFormatter().CODE_UNAUTHORIZED)
 })

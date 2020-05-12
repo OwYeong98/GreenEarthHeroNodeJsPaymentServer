@@ -80,7 +80,7 @@ router.post('/webhook', function(req,res){
 
     
     try {
-      event = stripe.webhooks.constructEvent(req.body(), sig, process.env.STRIPE_WEBHOOK_SECRET);
+      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
     }
     catch (err) {
       res.status(400).send(`Webhook Error: ${err.message}`);

@@ -7,7 +7,7 @@ var stripe = require('stripe')(process.env.STRIPE_SERVER_API_KEY);
 const admin = require('firebase-admin');
 
 router.get('/initializePaymentIntent', [
-    check('firebaseToken','Firebase Token cannot be empty!').exists()
+    check('itemIdToPurchase','Item Id cannot be empty!').exists()
   ],
   async function initializeStripePaymentIntent (req, res) {
     const errors = validationResult(req);
@@ -16,12 +16,40 @@ router.get('/initializePaymentIntent', [
       return
     }
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 2099,
-      currency: 'myr',
-      payment_method_types: ['card'],
-    });
-    new jsonFormatter().respondWithData(res,{secret:paymentIntent.client_secret})
+    var idToken = req.query.firebaseToken
+    var firebaseUserId = await admin.auth().verifyIdToken(idToken)
+      .then(function(decodedToken) {
+          //found user id
+          let uid = decodedToken.uid;
+  
+          return uid
+      })
+    
+    var itemDetail = await admin.firestore().collection("Second_Hand_Item").doc(req.query.itemIdToPurchase).get()
+      .then(doc => {
+          if (!doc.exists) {
+            return null
+          } else {
+            return doc.data();
+          }
+      }).catch(err=>{
+          return null
+      })
+    
+    if(itemDetail == null){
+      new jsonFormatter().respondWithError(res,["Error getting item detail, Please make sure item id is valid!"],new jsonFormatter().CODE_BAD_REQUEST)
+    }else{
+      //store firebase user id to metadata so we can know who purchase the item when stripe send webhook payment successfully done
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: itemDetail.itemPrice*100,
+        currency: 'myr',
+        payment_method_types: ['card'],
+        metadata: {firebaseUser: firebaseUserId}
+      });
+      new jsonFormatter().respondWithData(res,{secret:paymentIntent.client_secret})
+    }
+    
+    
   }
 )
 

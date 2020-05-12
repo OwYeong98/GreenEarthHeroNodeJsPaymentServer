@@ -106,11 +106,11 @@ router.post('/webhook', function(req,res){
 
       default:
         // Unexpected event type
-        return response.status(400).end();
+        return res.status(400).end();
     }
 
     // Return a response to acknowledge receipt of the event
-    response.json({received: true});
+    res.json({received: true});
 })
 router.get('/testerrorhaha', function(req,res){
     new jsonFormatter().respondWithError(res,"Sorry input invalid",new jsonFormatter().CODE_UNAUTHORIZED)

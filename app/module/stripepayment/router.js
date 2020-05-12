@@ -6,71 +6,71 @@ const { check, validationResult } = require('express-validator');
 var stripe = require('stripe')(process.env.STRIPE_SERVER_API_KEY);
 const admin = require('firebase-admin');
 
-router.get('/initializePaymentIntent', [
-    check('itemIdToPurchase','Item Id cannot be empty!').exists(),
-    check('locationId','Location Id cannot be empty!').exists()
-  ],
-  async function initializeStripePaymentIntent (req, res) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      new jsonFormatter().respondWithError(res,errors.array(),new jsonFormatter().CODE_FORBIDDEN)
-      return
-    }
+// router.get('/initializePaymentIntent', [
+//     check('itemIdToPurchase','Item Id cannot be empty!').exists(),
+//     check('locationId','Location Id cannot be empty!').exists()
+//   ],
+//   async function initializeStripePaymentIntent (req, res) {
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//       new jsonFormatter().respondWithError(res,errors.array(),new jsonFormatter().CODE_FORBIDDEN)
+//       return
+//     }
 
-    var idToken = req.query.firebaseToken
-    var firebaseUserId = await admin.auth().verifyIdToken(idToken)
-      .then(function(decodedToken) {
-          //found user id
-          let uid = decodedToken.uid;
+//     var idToken = req.query.firebaseToken
+//     var firebaseUserId = await admin.auth().verifyIdToken(idToken)
+//       .then(function(decodedToken) {
+//           //found user id
+//           let uid = decodedToken.uid;
   
-          return uid
-      })
+//           return uid
+//       })
     
-    var itemDetail = await admin.firestore().collection("Second_Hand_Item").doc(req.query.itemIdToPurchase).get()
-      .then(doc => {
-          if (!doc.exists) {
-            return null
-          } else {
-            return doc;
-          }
-      }).catch(err=>{
-          return null
-      })
-    var locationDetail = await admin.firestore().collection("Location").doc(req.query.locationId).get()
-      .then(doc => {
-          if (!doc.exists) {
-            return null
-          } else {
-            return doc;
-          }
-      }).catch(err=>{
-          return null
-      })
+//     var itemDetail = await admin.firestore().collection("Second_Hand_Item").doc(req.query.itemIdToPurchase).get()
+//       .then(doc => {
+//           if (!doc.exists) {
+//             return null
+//           } else {
+//             return doc;
+//           }
+//       }).catch(err=>{
+//           return null
+//       })
+//     var locationDetail = await admin.firestore().collection("Location").doc(req.query.locationId).get()
+//       .then(doc => {
+//           if (!doc.exists) {
+//             return null
+//           } else {
+//             return doc;
+//           }
+//       }).catch(err=>{
+//           return null
+//       })
     
-    if(itemDetail == null || locationDetail == null){
-      var errors= []
+//     if(itemDetail == null || locationDetail == null){
+//       var errors= []
 
-      if(itemDetail == null){
-        errors.push('Error getting item detail, Please make sure item id is valid!')
-      }
+//       if(itemDetail == null){
+//         errors.push('Error getting item detail, Please make sure item id is valid!')
+//       }
 
-      if(locationDetail == null){
-        errors.push('Error getting location detail, Please make sure location id is valid!')
-      }
+//       if(locationDetail == null){
+//         errors.push('Error getting location detail, Please make sure location id is valid!')
+//       }
 
-      new jsonFormatter().respondWithError(res,errors,new jsonFormatter().CODE_BAD_REQUEST)
-    }else{
-      //store firebase user id to metadata so we can know who purchase the item when stripe send webhook payment successfully done
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: itemDetail.data().itemPrice*100,
-        currency: 'myr',
-        payment_method_types: ['card'],
-        metadata: {itemId:req.query.itemIdToPurchase,firebaseUser: firebaseUserId,locationId:locationDetail.id}
-      });
-      new jsonFormatter().respondWithData(res,{secret:paymentIntent.client_secret})
-    }
-  }
-)
+//       new jsonFormatter().respondWithError(res,errors,new jsonFormatter().CODE_BAD_REQUEST)
+//     }else{
+//       //store firebase user id to metadata so we can know who purchase the item when stripe send webhook payment successfully done
+//       const paymentIntent = await stripe.paymentIntents.create({
+//         amount: itemDetail.data().itemPrice*100,
+//         currency: 'myr',
+//         payment_method_types: ['card'],
+//         metadata: {itemId:req.query.itemIdToPurchase,firebaseUser: firebaseUserId,locationId:locationDetail.id}
+//       });
+//       new jsonFormatter().respondWithData(res,{secret:paymentIntent.client_secret})
+//     }
+//   }
+// )
 
 
 // router.post('/webhook', function(req,res){

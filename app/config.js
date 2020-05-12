@@ -30,7 +30,7 @@ key = {
 "client_x509_cert_url": process.env.firebase_client_x509_cert_url
 }
 
-// log.info(keytest)
+// log.info("myKey:keytest.private_key)
 // key = {
 //     "type": "service_account",
 //     "project_id": "greenearthhero-cceb4",

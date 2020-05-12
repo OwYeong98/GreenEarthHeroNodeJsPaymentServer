@@ -7,7 +7,8 @@ var stripe = require('stripe')(process.env.STRIPE_SERVER_API_KEY);
 const admin = require('firebase-admin');
 
 router.get('/initializePaymentIntent', [
-    check('itemIdToPurchase','Item Id cannot be empty!').exists()
+    check('itemIdToPurchase','Item Id cannot be empty!').exists(),
+    check('locationId','Location Id cannot be empty!').exists()
   ],
   async function initializeStripePaymentIntent (req, res) {
     const errors = validationResult(req);
@@ -30,34 +31,86 @@ router.get('/initializePaymentIntent', [
           if (!doc.exists) {
             return null
           } else {
-            return doc.data();
+            return doc;
+          }
+      }).catch(err=>{
+          return null
+      })
+    var locationDetail = await admin.firestore().collection("Location").doc(req.query.locationId).get()
+      .then(doc => {
+          if (!doc.exists) {
+            return null
+          } else {
+            return doc;
           }
       }).catch(err=>{
           return null
       })
     
-    if(itemDetail == null){
-      new jsonFormatter().respondWithError(res,["Error getting item detail, Please make sure item id is valid!"],new jsonFormatter().CODE_BAD_REQUEST)
+    if(itemDetail == null || locationDetail == null){
+      var errors= []
+
+      if(itemDetail == null){
+        errors.push('Error getting item detail, Please make sure item id is valid!')
+      }
+
+      if(locationDetail == null){
+        errors.push('Error getting location detail, Please make sure location id is valid!')
+      }
+
+      new jsonFormatter().respondWithError(res,errors,new jsonFormatter().CODE_BAD_REQUEST)
     }else{
       //store firebase user id to metadata so we can know who purchase the item when stripe send webhook payment successfully done
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: itemDetail.itemPrice*100,
+        amount: itemDetail.data().itemPrice*100,
         currency: 'myr',
         payment_method_types: ['card'],
-        metadata: {firebaseUser: firebaseUserId}
+        metadata: {itemId:req.query.itemIdToPurchase,firebaseUser: firebaseUserId,locationId:locationDetail.id}
       });
       new jsonFormatter().respondWithData(res,{secret:paymentIntent.client_secret})
     }
-    
-    
   }
 )
 
 
 
 
-router.get('/testokhaha', function(req,res){
-    new jsonFormatter().respondWithOk(res)
+router.get('/webhook', function(req,res){
+    let event;
+    const sig = req.headers['stripe-signature'];
+
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    }
+    catch (err) {
+      response.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle the event
+    switch (event.type) {
+      case 'payment_intent.succeeded':
+        const paymentIntent = event.data.object;
+        
+        var firebaseUserId= paymentIntent.metadata.firebaseUser;
+        var locationId = paymentIntent.metadata.locationId;
+        var itemId = paymentIntent.metadata.itemId;
+
+        log.info(`webhook received userID: ${firebaseUserId} | locId: ${locationId} | itemId: ${itemId}`)
+
+        let documentRef = admin.firestore().doc('Second_Hand_Item/'+itemId);
+
+        documentRef.update({deliveryLocationId: locationId,boughtBy: firebaseUserId}).then(res => {
+          console.log(`Document updated at ${res.updateTime}`);
+        });
+        break;
+        
+      default:
+        // Unexpected event type
+        return response.status(400).end();
+    }
+
+    // Return a response to acknowledge receipt of the event
+    response.json({received: true});
 })
 router.get('/testerrorhaha', function(req,res){
     new jsonFormatter().respondWithError(res,"Sorry input invalid",new jsonFormatter().CODE_UNAUTHORIZED)

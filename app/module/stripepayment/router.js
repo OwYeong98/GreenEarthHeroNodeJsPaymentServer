@@ -21,7 +21,7 @@ router.get('/initializePaymentIntent', [
       currency: 'myr',
       payment_method_types: ['card'],
     });
-    new jsonFormatter().respondWithData(res,{secret:paymentIntent.id})
+    new jsonFormatter().respondWithData(res,{secret:paymentIntent.client_secret})
   }
 )
 

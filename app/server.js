@@ -18,20 +18,20 @@ app.use((req, res, next)=> {
     }) 
   });
 
-var unless = function(path, middleware) {
-    return function(req, res, next) {
-        if (path === req.path) {
-            return next();
-        } else {
-            return middleware(req, res, next);
-        }
-    };
-};
-//pass body as json
-// support parsing of application/json type post data
-app.use(bodyParser.json());
-//support parsing of application/x-www-form-urlencoded post data
-app.use(bodyParser.urlencoded({ extended: true }));
+// var unless = function(path, middleware) {
+//     return function(req, res, next) {
+//         if (path === req.path) {
+//             return next();
+//         } else {
+//             return middleware(req, res, next);
+//         }
+//     };
+// };
+// //pass body as json
+// // support parsing of application/json type post data
+// app.use(bodyParser.json());
+// //support parsing of application/x-www-form-urlencoded post data
+// app.use(bodyParser.urlencoded({ extended: true }));
 
 
 // See the README about ordering of middleware

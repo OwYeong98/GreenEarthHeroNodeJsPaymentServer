@@ -16,7 +16,7 @@ var unless = function(path, middleware) {
 // support parsing of application/json type post data
 app.use(unless('/api/stripe/webhook',bodyParser.json()));
 //support parsing of application/x-www-form-urlencoded post data
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(unless('/api/stripe/webhook',bodyParser.urlencoded({ extended: true })));
 
 
 // See the README about ordering of middleware

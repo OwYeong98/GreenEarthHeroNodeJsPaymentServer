@@ -3,20 +3,20 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 
-var unless = function(path, middleware) {
-    return function(req, res, next) {
-        if (path === req.path) {
-            return next();
-        } else {
-            return middleware(req, res, next);
-        }
-    };
-};
-//pass body as json
-// support parsing of application/json type post data
-app.use(unless('/api/stripe/webhook',bodyParser.json()));
-//support parsing of application/x-www-form-urlencoded post data
-app.use(unless('/api/stripe/webhook',bodyParser.urlencoded({ extended: true })));
+// var unless = function(path, middleware) {
+//     return function(req, res, next) {
+//         if (path === req.path) {
+//             return next();
+//         } else {
+//             return middleware(req, res, next);
+//         }
+//     };
+// };
+// //pass body as json
+// // support parsing of application/json type post data
+// app.use(unless('/api/stripe/webhook',bodyParser.json()));
+// //support parsing of application/x-www-form-urlencoded post data
+// app.use(unless('/api/stripe/webhook',bodyParser.urlencoded({ extended: true })));
 
 
 // See the README about ordering of middleware
